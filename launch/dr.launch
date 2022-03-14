@@ -1,17 +1,20 @@
 <launch>
   <node pkg="data_replay" name="data_replay_node" type="data_replay_node" output="screen" >
 
-  <param name="imu_path" type="string" value="/midea_robot/ros2_ws/3/imu_2022_03_03_17_24_17.txt" />
-  <param name="imu2_path" type="string" value="/midea_robot/ros2_ws/3/imu2_2022_03_03_17_24_17.txt" />
-  <param name="odom_path" type="string" value="/midea_robot/ros2_ws/3/odom_2022_03_03_17_24_17.txt" />
-  <param name="localization_path" type="string" value="/midea_robot/ros2_ws/3/gps_localization_2022_03_03_17_24_17.txt" />
+  <param name="imu_path" type="string" value="/home/midea/Downloads/data_publisher/dataset/imu.txt" />
+  <param name="imu2_path" type="string" value="/midea_robot/ros2_ws/mower_data/3_10/1_outdoor_building_rawdata/imu2_2017_08_05_17_07_39.txt" />
+  <param name="odom_path" type="string" value="/home/midea/Downloads/data_publisher/dataset/odom.txt" />
+  <param name="gps_path" type="string" value="/home/midea/Downloads/data_publisher/dataset/gps.txt" />
+  <param name="localization_path" type="string" value="/midea_robot/ros2_ws/mower_data/3_10/1_outdoor_building_rawdata/gps_localization_2017_08_05_17_07_39txt" />
   
-  <param name="imu_replay" type="bool" value="true" />
+  <param name="imu_replay" type="bool" value="false" />
   <param name="imu2_replay" type="bool" value="false" />
   <param name="odom_replay" type="bool" value="false" />
+  <param name="gps_replay" type="bool" value="false" />
   <param name="localization_replay" type="bool" value="false" />
+  <param name="all_replay" type="bool" value="true" />
   
-  <param name="rate" type="int" value="300" />
+  <param name="rate" type="int" value="100" />
   
   </node>
 </launch> 
