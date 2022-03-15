@@ -104,7 +104,7 @@ void DataReplay::SetImuMsg(sensor_msgs::Imu &msg, string &imu_data)
 
 		if(mbShowRPY){
 		Eigen::Quaterniond Quat(msg.orientation.w, msg.orientation.x, msg.orientation.y, msg.orientation.z);
-		ROS_INFO("time:%9d.%9d Quat roll(x) pitch(y) yaw(z) = %f %f %f", msg.header.stamp.sec, 
+		// ROS_INFO("time:%9d.%9d Quat roll(x) pitch(y) yaw(z) = %f %f %f", msg.header.stamp.sec, 
 			msg.header.stamp.nsec, Quat.matrix().eulerAngles(0, 1, 2).transpose()(0) / M_PI * 180,
 			Quat.matrix().eulerAngles(0, 1, 2).transpose()(1) / M_PI * 180,
 			Quat.matrix().eulerAngles(0, 1, 2).transpose()(2) / M_PI * 180 );
@@ -134,7 +134,7 @@ void DataReplay::SetOdomLclzAsImuMsg(sensor_msgs::Imu &msg, string &odom_data)
 
 		if(mbShowRPY){
 		Eigen::Quaterniond Quat(msg.orientation.w, msg.orientation.x, msg.orientation.y, msg.orientation.z);
-		ROS_INFO("time:%9d.%9d Quat roll(x) pitch(y) yaw(z) = %f %f %f", msg.header.stamp.sec, 
+		// ROS_INFO("time:%9d.%9d Quat roll(x) pitch(y) yaw(z) = %f %f %f", msg.header.stamp.sec, 
 			msg.header.stamp.nsec, Quat.matrix().eulerAngles(0, 1, 2).transpose()(0) / M_PI * 180,
 			Quat.matrix().eulerAngles(0, 1, 2).transpose()(1) / M_PI * 180,
 			Quat.matrix().eulerAngles(0, 1, 2).transpose()(2) / M_PI * 180 );
@@ -259,12 +259,10 @@ void DataReplay::AllReplayRun()
 		startTime = clock();
 		if (mbFirstFlag){
 			// get first data
-			ROS_INFO("mbFirstFlag=true");
 			LoadData(mfImu, msImuData);
 			SetImuMsg(mImuMsg, msImuData);
 			maImuCurTimeStamp[0] = maImuNextTimeStamp[0];
 			maImuCurTimeStamp[1] = maImuNextTimeStamp[1];
-			ROS_INFO("time:%9d.%9d", maImuCurTimeStamp[0], maImuCurTimeStamp[1]);
 			LoadData(mfOdom, msOdomData);
 			SetOdomMsg(mOdomMsg, msOdomData);
 			LoadData(mfGps, msGpsData);
@@ -285,7 +283,7 @@ void DataReplay::AllReplayRun()
 			PubMsg(mOdomMsg, pub_odom);
 			LoadData(mfOdom, msOdomData);
 			SetOdomMsg(mOdomMsg, msOdomData);
-			ROS_INFO("odom_time:%9d.%9d", maOdomTimeStamp[0], maOdomTimeStamp[1]);
+			// ROS_INFO("odom_time:%9d.%9d", maOdomTimeStamp[0], maOdomTimeStamp[1]);
 		}
 
 		long long int gps_diff = 
@@ -295,11 +293,11 @@ void DataReplay::AllReplayRun()
 			PubMsg(mGpsMsg, pub_gps);
 			LoadData(mfGps, msGpsData);
 			SetGpsmMsg(mGpsMsg, msGpsData);
-			ROS_INFO("gps_time:%9d.%9d", maGpsTimeStamp[0], maGpsTimeStamp[1]);
+			// ROS_INFO("gps_time:%9d.%9d", maGpsTimeStamp[0], maGpsTimeStamp[1]);
 		}
 		LoadData(mfImu, msImuData);
 		SetImuMsg(mImuMsg, msImuData);
-		ROS_INFO("imu_time:%9d.%9d", maImuNextTimeStamp[0], maImuNextTimeStamp[1]);
+		// ROS_INFO("imu_time:%9d.%9d", maImuNextTimeStamp[0], maImuNextTimeStamp[1]);
 		long long int NanoSecDiff = maImuNextTimeStamp[1] - maImuCurTimeStamp[1];
 		long long int SecDiff = maImuNextTimeStamp[0] - maImuCurTimeStamp[0];
 		mnSleepTime = SecDiff * 1e9 + NanoSecDiff;
