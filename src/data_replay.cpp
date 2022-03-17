@@ -104,7 +104,7 @@ void DataReplay::SetImuMsg(sensor_msgs::Imu &msg, string &imu_data)
 
 		if(mbShowRPY){
 		Eigen::Quaterniond Quat(msg.orientation.w, msg.orientation.x, msg.orientation.y, msg.orientation.z);
-		// ROS_INFO("time:%9d.%9d Quat roll(x) pitch(y) yaw(z) = %f %f %f", msg.header.stamp.sec, 
+		ROS_INFO("time:%9d.%9d Quat roll(x) pitch(y) yaw(z) = %f %f %f", msg.header.stamp.sec, 
 			msg.header.stamp.nsec, Quat.matrix().eulerAngles(0, 1, 2).transpose()(0) / M_PI * 180,
 			Quat.matrix().eulerAngles(0, 1, 2).transpose()(1) / M_PI * 180,
 			Quat.matrix().eulerAngles(0, 1, 2).transpose()(2) / M_PI * 180 );
@@ -134,7 +134,7 @@ void DataReplay::SetOdomLclzAsImuMsg(sensor_msgs::Imu &msg, string &odom_data)
 
 		if(mbShowRPY){
 		Eigen::Quaterniond Quat(msg.orientation.w, msg.orientation.x, msg.orientation.y, msg.orientation.z);
-		// ROS_INFO("time:%9d.%9d Quat roll(x) pitch(y) yaw(z) = %f %f %f", msg.header.stamp.sec, 
+		ROS_INFO("time:%9d.%9d Quat roll(x) pitch(y) yaw(z) = %f %f %f", msg.header.stamp.sec, 
 			msg.header.stamp.nsec, Quat.matrix().eulerAngles(0, 1, 2).transpose()(0) / M_PI * 180,
 			Quat.matrix().eulerAngles(0, 1, 2).transpose()(1) / M_PI * 180,
 			Quat.matrix().eulerAngles(0, 1, 2).transpose()(2) / M_PI * 180 );
@@ -263,6 +263,7 @@ void DataReplay::AllReplayRun()
 			SetImuMsg(mImuMsg, msImuData);
 			maImuCurTimeStamp[0] = maImuNextTimeStamp[0];
 			maImuCurTimeStamp[1] = maImuNextTimeStamp[1];
+			// ROS_INFO("time:%9d.%9d", maImuCurTimeStamp[0], maImuCurTimeStamp[1]);
 			LoadData(mfOdom, msOdomData);
 			SetOdomMsg(mOdomMsg, msOdomData);
 			LoadData(mfGps, msGpsData);
@@ -315,32 +316,85 @@ void DataReplay::MainRun()
 	if(mbAllReplay == true) AllReplayRun();
 }
 
-// void SetRecordImuPrefix(const std::string& logFile)
-// {
-//     mLogOfstream.open(logFile.c_str(), std::ios::app);
-//     mLogOfstream
-//         << "time_stamp_sec time_stamp_nsec"
-//         << std::endl;
-//     mLogOfstream.close();
-// }
+void DataReplay::SetLog(std::string &log)
+{
+	char buff[80];
+	struct tm* info;
+	time_t now;
+	time(&now);
+	info = (localtime(&now));
+	strftime(buff, 30, "_%Y_%m_%d_%H_%M_%S.txt", info);
+	log = mLogFilePathPredix + "/" + log + std::string(buff);
+}
 
-// void RecordLog(sensor_msgs::Imu &msg, const std::string& logFile){
-// 	mLogOfstream.open(logFile.c_str(), std::ios::app);
-//   	mLogOfstream << msg.header.stamp.sec << " "
-//                  << msg.header.stamp.nsec << " "
-//                  << msg.linear_acceleration.x << " "
-//                  << msg.linear_acceleration.y << " "
-//                  << msg.linear_acceleration.z << " "
-//                  << msg.angular_velocity.x << " "
-//                  << msg.angular_velocity.y << " "
-//                  << msg.angular_velocity.z << " "
-//                  << msg.orientation.x << " "
-//                  << msg.orientation.y << " "
-//                  << msg.orientation.z << " "
-//                  << msg.orientation.w << " "
-// 				 << std::endl;
-//   	mLogOfstream.close();
-// }
+void DataReplay::RecordData(const std::string& logFile, sensor_msgs::Imu &msg)
+{
+	mImuLogOfstream.open(logFile.c_str(), std::ios::app);
+	mImuLogOfstream.setf(ios::fixed);
+	mImuLogOfstream.precision(9);
+	Eigen::Quaterniond q(msg.orientation.w, msg.orientation.x, msg.orientation.y, msg.orientation.z);
+	double r, p, y;
+	toEulerAngle(q, r, p, y);
+  	mImuLogOfstream << msg.header.stamp.sec << " "
+                 << msg.header.stamp.nsec << " "
+                 << msg.linear_acceleration.x << " "
+                 << msg.linear_acceleration.y << " "
+                 << msg.linear_acceleration.z << " "
+                 << msg.angular_velocity.x << " "
+                 << msg.angular_velocity.y << " "
+                 << msg.angular_velocity.z << " "
+                 << msg.orientation.x << " "
+                 << msg.orientation.y << " "
+                 << msg.orientation.z << " "
+                 << msg.orientation.w << " "
+				 << r / M_PI * 180 << " "
+				 << p / M_PI * 180 << " "
+				 << y / M_PI * 180
+				 << std::endl;
+  	mImuLogOfstream.close();
+}
 
+void DataReplay::RecordData(const std::string& logFile, nav_msgs::Odometry &msg)
+{
+	mOdomLogOfstream.open(logFile.c_str(), std::ios::app);
+	mOdomLogOfstream.setf(ios::fixed);
+	mOdomLogOfstream.precision(9);
+	mOdomLogOfstream
+		<< msg.header.stamp.sec << " "
+		<< msg.header.stamp.nsec << " "
+		<< msg.pose.pose.position.x << " "
+		<< msg.pose.pose.position.y << " "
+		<< msg.pose.pose.position.z << " "
+		<< msg.pose.pose.orientation.x << " "
+		<< msg.pose.pose.orientation.y << " "
+		<< msg.pose.pose.orientation.z << " "
+		<< msg.pose.pose.orientation.w << " "
+		<< std::endl;
+	mOdomLogOfstream.close();
+}
 
-
+void DataReplay::RecordData(const std::string& logFile, nmea_msgs::Gpgga &msg)
+{
+	mGpsLogOfstream.open(logFile.c_str(), std::ios::app);
+	mGpsLogOfstream.setf(ios::fixed);
+	mGpsLogOfstream.precision(9);
+	mGpsLogOfstream
+		<< msg.header.stamp.sec << " "
+		<< msg.header.stamp.nsec << " "
+		<< msg.header.frame_id << " "
+		<< msg.utc_seconds << " "
+		<< msg.lat << " "
+		<< msg.lat_dir << " "
+		<< msg.lon << " "
+		<< msg.lon_dir << " "
+		<< msg.gps_qual << " "
+		<< msg.num_sats << " "
+		<< msg.hdop << " "
+		<< msg.alt << " "
+		<< msg.altitude_units << " "
+		<< msg.undulation << " "
+		<< msg.undulation_units << " "
+		<< msg.diff_age 
+		<< std::endl;
+	mGpsLogOfstream.close();
+}

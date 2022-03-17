@@ -43,7 +43,7 @@ public:
 	int mnRate;
 	bool mbImuReplay, mbImu2Replay, mbOdomReplay, mbGpsReplay, mbLocalizationReplay, mbAllReplay= false;
 	bool mbShowRPY = false;
-	string msImuPath, msImu2Path, msOdomPath, msGpsPath, msLocalizationPath;
+	std::string msImuPath, msImu2Path, msOdomPath, msGpsPath, msLocalizationPath, mLogFilePathPredix;
 
 
 private:
@@ -71,7 +71,15 @@ private:
 
 	void toEulerAngle(const Eigen::Quaterniond& q, double& roll, double& pitch, double& yaw);
 
-	vector<string> splitData(string& input);
+	void SetLog(std::string &log);
+
+	void RecordData(const std::string& logFile, sensor_msgs::Imu &msg);
+
+	void RecordData(const std::string& logFile, nav_msgs::Odometry &msg);
+
+	void RecordData(const std::string& logFile, nmea_msgs::Gpgga &msg);
+
+	std::vector<string> splitData(string& input);
 
 	template <typename Type>  
 	Type stringToNum(const string &str);
@@ -83,11 +91,21 @@ private:
 	bool mbFirstFlag = true;
 
 	ifstream mfImu, mfOdom, mfGps, mfLclz;
-	string msImuData, msOdomData, msGpsData;
+	std::string msImuData, msOdomData, msGpsData;
 
 	long long int maImuCurTimeStamp[2], maImuNextTimeStamp[2], maOdomTimeStamp[2], maGpsTimeStamp[2];
 	long long int mnImuTimeStamp, mnOdomTimeStamp, mnGpsTimeStamp, mnSleepTime;
-	vector<double> mvImuCurData, mvImuNextData;
+	std::vector<double> mvImuCurData, mvImuNextData;
+
+	
+	std::string	mImuLogFileName = "imu";
+	std::ofstream mImuLogOfstream;
+
+	std::string	mOdomLogFileName = "odom";
+	std::ofstream mOdomLogOfstream;
+
+	std::string	mGpsLogFileName = "gps";
+	std::ofstream mGpsLogOfstream;
 	
     ros::NodeHandle* nh_;
 };

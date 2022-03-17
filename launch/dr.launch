@@ -6,7 +6,8 @@
   <param name="odom_path" type="string" value="/home/midea/Downloads/data_publisher/dataset/odom.txt" />
   <param name="gps_path" type="string" value="/home/midea/Downloads/data_publisher/dataset/gps.txt" />
   <param name="localization_path" type="string" value="/midea_robot/ros2_ws/mower_data/3_10/1_outdoor_building_rawdata/gps_localization_2017_08_05_17_07_39txt" />
-  
+  <param name="log_file_path_prefix" type="string" value="/midea_robot/ros2_ws/log" />
+
   <param name="imu_replay" type="bool" value="false" />
   <param name="imu2_replay" type="bool" value="false" />
   <param name="odom_replay" type="bool" value="false" />

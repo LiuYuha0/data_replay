@@ -19,6 +19,7 @@ int main(int argc, char **argv)
 	std::shared_ptr<DataReplay> pDR(std::make_shared<DataReplay>());
 
 	ros::param::get("~rate", pDR->mnRate);
+	ros::param::get("~log_file_path_prefix", pDR->mLogFilePathPredix);
 	ros::param::get("~imu_path", pDR->msImuPath);
 	ros::param::get("~imu2_path", pDR->msImu2Path);
 	ros::param::get("~odom_path", pDR->msOdomPath);
@@ -30,6 +31,7 @@ int main(int argc, char **argv)
 	ros::param::get("~gps_replay", pDR->mbGpsReplay);
 	ros::param::get("~localization_replay", pDR->mbLocalizationReplay);
 	ros::param::get("~all_replay", pDR->mbAllReplay);
+	
 
 	pDR->init();
 	pDR->MainRun();
