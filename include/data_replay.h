@@ -9,11 +9,13 @@
 #include <ros/ros.h>
 #include <sensor_msgs/Imu.h>
 #include <nav_msgs/Odometry.h>
+#include <nav_msgs/Path.h>
+#include <nav_msgs/Odometry.h>
 #include <nmea_msgs/Gpgga.h>
 
 using namespace std;
 
-extern ros::Publisher pub_imu, pub_odom, pub_gps;
+extern ros::Publisher pub_imu, pub_odom, pub_gps, pub_path;
 
 template<typename T>
 static inline T norm_value(T x, T lb, T ub)
@@ -57,15 +59,21 @@ private:
 
 	void SetOdomLclzAsImuMsg(sensor_msgs::Imu &msg, string &odom_data);
 
+	void setLclzAsPathMsg(nav_msgs::Path &msg, string &path_data);
+
 	void PubMsg(sensor_msgs::Imu &msg, ros::Publisher& pub_msg);
 
 	void PubMsg(nav_msgs::Odometry &msg, ros::Publisher& pub_msg);
 
 	void PubMsg(nmea_msgs::Gpgga &msg, ros::Publisher& pub_msg);
 
+	void PubMsg(nav_msgs::Path &msg, ros::Publisher& pub_msg);
+
 	void ImuReplayRun();
 
 	void OdomReplayRun();
+
+	void LclzPathReplayRun();
 
 	void AllReplayRun();
 
@@ -87,11 +95,12 @@ private:
 	sensor_msgs::Imu mImuMsg;
 	nav_msgs::Odometry mOdomMsg;
 	nmea_msgs::Gpgga mGpsMsg;
+	nav_msgs::Path mPathMsg;
 
 	bool mbFirstFlag = true;
 
 	ifstream mfImu, mfOdom, mfGps, mfLclz;
-	std::string msImuData, msOdomData, msGpsData;
+	std::string msImuData, msOdomData, msGpsData, msLclzData;
 
 	long long int maImuCurTimeStamp[2], maImuNextTimeStamp[2], maOdomTimeStamp[2], maGpsTimeStamp[2];
 	long long int mnImuTimeStamp, mnOdomTimeStamp, mnGpsTimeStamp, mnSleepTime;

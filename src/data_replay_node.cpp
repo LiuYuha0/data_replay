@@ -4,7 +4,7 @@
 
 #include "data_replay.h"
 
-ros::Publisher pub_imu, pub_odom, pub_gps;
+ros::Publisher pub_imu, pub_odom, pub_gps, pub_path;
 
 int main(int argc, char **argv)
 {
@@ -15,6 +15,7 @@ int main(int argc, char **argv)
     pub_imu = nh.advertise<sensor_msgs::Imu>("/data_replay/imu", 100);
     pub_odom = nh.advertise<nav_msgs::Odometry>("/data_replay/odom", 100);
 	pub_gps = nh.advertise<nmea_msgs::Gpgga>("/data_replay/gps", 100);
+	pub_path = nh.advertise<nav_msgs::Path>("/data_replay/path", 100);
 
 	std::shared_ptr<DataReplay> pDR(std::make_shared<DataReplay>());
 

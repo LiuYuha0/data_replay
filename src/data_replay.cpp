@@ -13,7 +13,7 @@ void DataReplay::init()
 	if(mbImu2Replay)  mfImu.open(msImu2Path);
 	if(mbOdomReplay || mbAllReplay)  mfOdom.open(msOdomPath);
 	if(mbGpsReplay || mbAllReplay)  mfGps.open(msGpsPath);
-	if(mbLocalizationReplay)  mfOdom.open(msLocalizationPath);
+	if(mbLocalizationReplay)  mfLclz.open(msLocalizationPath);
 }
 
 template <typename Type> 
@@ -67,7 +67,7 @@ void DataReplay::LoadData(ifstream& fTimes, string& fileData)
 {
 	getline(fTimes, fileData);
 	if(fileData.empty()) {
-		ROS_INFO("no data");
+		ROS_ERROR("no data");
 		return;
 	}
 	fileData = fileData + " ";
@@ -86,6 +86,7 @@ void DataReplay::SetImuMsg(sensor_msgs::Imu &msg, string &imu_data)
 			vImuCvt.push_back(stringToNum<double>(vImuTmp[i]));
 		}
 
+		msg.header.frame_id = "imu";
 		msg.header.stamp.sec = vImuCvt[0];
 		msg.header.stamp.nsec = vImuCvt[1];
 		msg.linear_acceleration.x = vImuCvt[2];
@@ -154,6 +155,7 @@ void DataReplay::SetOdomMsg(nav_msgs::Odometry &msg, string &odom_data)
 			vOdomCvt.push_back(stringToNum<double>(vOdomTmp[i]));
 		}
 
+		msg.header.frame_id = "odom";
 		msg.header.stamp.sec = vOdomCvt[0];
 		msg.header.stamp.nsec = vOdomCvt[1];
         msg.pose.pose.position.x = vOdomCvt[2];
@@ -178,38 +180,44 @@ void DataReplay::SetGpsmMsg(nmea_msgs::Gpgga &msg, string &gps_data)
 		// msg.header.frame_id = "gps";
         msg.header.stamp.sec = stringToNum<double>(vGpsDataSplit[0]);
         msg.header.stamp.nsec = stringToNum<double>(vGpsDataSplit[1]);
-        msg.header.frame_id = vGpsDataSplit[2].empty() ? 
-							"0" : vGpsDataSplit[2];
-        msg.utc_seconds = vGpsDataSplit[3].empty()? 
-							0.: stringToNum<float>(vGpsDataSplit[3]);
-        msg.lat = vGpsDataSplit[4].empty()? 
-							0. :  stringToNum<double>(vGpsDataSplit[4]);
-        msg.lat_dir = vGpsDataSplit[5].empty() ? 
-							"0": vGpsDataSplit[5];
-        msg.lon = vGpsDataSplit[6].empty()? 
-							0. : stringToNum<double>(vGpsDataSplit[6]);
-        msg.lon_dir = vGpsDataSplit[7].empty() ? 
-							"0" : vGpsDataSplit[7];
-        msg.gps_qual = vGpsDataSplit[8].empty() ? 
-							0 : stringToNum<int>(vGpsDataSplit[8]);
-        msg.num_sats = vGpsDataSplit[9].empty() ? 
-							0 : stringToNum<int>(vGpsDataSplit[9]);
-        msg.hdop = vGpsDataSplit[10].empty()? 
-							0. : stringToNum<float>(vGpsDataSplit[10]);
-        msg.alt = vGpsDataSplit[11].empty()? 
-							0. : stringToNum<float>(vGpsDataSplit[11]);
-        msg.altitude_units = vGpsDataSplit[12].empty() ? 
-							"0" : vGpsDataSplit[12];
-        msg.undulation = vGpsDataSplit[13].empty()? 
-							0. : stringToNum<float>(vGpsDataSplit[13]);
-        msg.undulation_units = vGpsDataSplit[14].empty() ? 
-							"0" : vGpsDataSplit[14];
-        msg.diff_age = vGpsDataSplit[15].empty() ? 
-							0 : stringToNum<int>(vGpsDataSplit[15]);
+        msg.header.frame_id = vGpsDataSplit[2].empty() ? "0" : vGpsDataSplit[2];
+        msg.utc_seconds = vGpsDataSplit[3].empty()? 0.: stringToNum<float>(vGpsDataSplit[3]);
+        msg.lat = vGpsDataSplit[4].empty()? 0. :  stringToNum<double>(vGpsDataSplit[4]);
+        msg.lat_dir = vGpsDataSplit[5].empty() ? "0": vGpsDataSplit[5];
+        msg.lon = vGpsDataSplit[6].empty()? 0. : stringToNum<double>(vGpsDataSplit[6]);
+        msg.lon_dir = vGpsDataSplit[7].empty() ? "0" : vGpsDataSplit[7];
+        msg.gps_qual = vGpsDataSplit[8].empty() ? 0 : stringToNum<int>(vGpsDataSplit[8]);
+        msg.num_sats = vGpsDataSplit[9].empty() ? 0 : stringToNum<int>(vGpsDataSplit[9]);
+        msg.hdop = vGpsDataSplit[10].empty()? 0. : stringToNum<float>(vGpsDataSplit[10]);
+        msg.alt = vGpsDataSplit[11].empty()? 0. : stringToNum<float>(vGpsDataSplit[11]);
+        msg.altitude_units = vGpsDataSplit[12].empty() ? "0" : vGpsDataSplit[12];
+        msg.undulation = vGpsDataSplit[13].empty()? 0. : stringToNum<float>(vGpsDataSplit[13]);
+        msg.undulation_units = vGpsDataSplit[14].empty() ? "0" : vGpsDataSplit[14];
+        msg.diff_age = vGpsDataSplit[15].empty() ? 0 : stringToNum<int>(vGpsDataSplit[15]);
 
 		maGpsTimeStamp[0] = stringToNum<double>(vGpsDataSplit[0]);
 		maGpsTimeStamp[1] = stringToNum<double>(vGpsDataSplit[1]);
 	}
+}
+
+void DataReplay::setLclzAsPathMsg(nav_msgs::Path &msg, string &path_data)
+{
+	if(!path_data.empty()){
+		vector<string> vPathDataSplit = splitData(path_data);
+
+		msg.header.frame_id = "world";
+		msg.header.stamp.sec = stringToNum<double>(vPathDataSplit[0]);
+		msg.header.stamp.nsec = stringToNum<double>(vPathDataSplit[1]);
+
+		geometry_msgs::PoseStamped this_pose_stamped;
+		this_pose_stamped.header.stamp.sec = stringToNum<double>(vPathDataSplit[0]);
+		this_pose_stamped.header.stamp.nsec = stringToNum<double>(vPathDataSplit[1]);
+		this_pose_stamped.pose.position.x = stringToNum<double>(vPathDataSplit[6]);
+		this_pose_stamped.pose.position.y = stringToNum<double>(vPathDataSplit[7]);
+		this_pose_stamped.pose.position.z = 0;
+		msg.poses.push_back(this_pose_stamped);
+	}
+
 }
 
 void DataReplay::PubMsg(sensor_msgs::Imu &msg, ros::Publisher& pub_msg)
@@ -223,6 +231,11 @@ void DataReplay::PubMsg(nav_msgs::Odometry &msg, ros::Publisher& pub_msg)
 }
 
 void DataReplay::PubMsg(nmea_msgs::Gpgga &msg, ros::Publisher& pub_msg)
+{
+	pub_msg.publish(msg);
+}
+
+void DataReplay::PubMsg(nav_msgs::Path &msg, ros::Publisher& pub_msg)
 {
 	pub_msg.publish(msg);
 }
@@ -247,6 +260,18 @@ void DataReplay::OdomReplayRun()
 		LoadData(mfOdom, msOdomData);
 		SetOdomLclzAsImuMsg(mImuMsg, msOdomData);
 		PubMsg(mImuMsg, pub_imu);
+		loop_rate.sleep();
+	}
+}
+
+void DataReplay::LclzPathReplayRun()
+{
+	ros::Rate loop_rate(mnRate);
+	while(!mfLclz.eof())
+	{
+		LoadData(mfLclz, msLclzData);
+		setLclzAsPathMsg(mPathMsg, msLclzData);
+		PubMsg(mPathMsg, pub_path);
 		loop_rate.sleep();
 	}
 }
@@ -311,9 +336,10 @@ void DataReplay::AllReplayRun()
 
 void DataReplay::MainRun()
 {
-	if(mbImuReplay == true || mbImu2Replay == true) ImuReplayRun();
-	if(mbOdomReplay == true || mbLocalizationReplay == true) OdomReplayRun();
-	if(mbAllReplay == true) AllReplayRun();
+	// if(mbImuReplay == true || mbImu2Replay == true) ImuReplayRun();
+	// if(mbOdomReplay) OdomReplayRun();
+	if(mbLocalizationReplay) LclzPathReplayRun();
+	// if(mbAllReplay) AllReplayRun();
 }
 
 void DataReplay::SetLog(std::string &log)
