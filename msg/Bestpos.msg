@@ -1,0 +1,24 @@
+std_msgs/Header header
+
+string message_id
+string sol_status 
+string pos_type 
+float64 lat 
+float64 lon
+float64 hgt 
+float32 undulation
+string datum_id
+float32 lat_sigma
+float32 lon_sigma 
+float32 hgt_sigma
+string stn_id
+float32 diff_age
+float32 sol_age 
+uint32 svs
+uint32 soln_svs
+uint32 reserved_1
+uint32 reserved_2
+uint32 reserved_3
+uint64 ext_sol_stat
+uint64 galileo_sig_mask
+uint64 gps_glonass_and_bds_sig_mask

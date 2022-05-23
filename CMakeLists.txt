@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0.2)
 project(data_replay)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-# add_compile_options(-std=c++11)
+add_compile_options(-std=c++14)
 
 # find_package(Boost REQUIRED COMPONENTS system
 find_package(catkin REQUIRED COMPONENTS
@@ -11,6 +11,16 @@ find_package(catkin REQUIRED COMPONENTS
  message_generation
  sensor_msgs
  nav_msgs
+)
+
+add_message_files(
+  FILES
+  Bestpos.msg
+)
+
+generate_messages(
+  DEPENDENCIES
+  std_msgs
 )
 
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -23,8 +33,7 @@ find_package(Eigen3)
 #)
 
 
-catkin_package(
-)
+catkin_package(CATKIN_DEPENDS roscpp rospy std_msgs message_runtime)
 # set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 include_directories(

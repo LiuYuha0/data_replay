@@ -4,7 +4,7 @@
 
 #include "data_replay.h"
 
-ros::Publisher pub_imu, pub_odom, pub_gps, pub_path;
+ros::Publisher pub_imu, pub_odom, pub_gps_bestpos, pub_gps_gpgga, pub_path;
 
 int main(int argc, char **argv)
 {
@@ -14,12 +14,15 @@ int main(int argc, char **argv)
 	
     pub_imu = nh.advertise<sensor_msgs::Imu>("/data_replay/imu", 100);
     pub_odom = nh.advertise<nav_msgs::Odometry>("/data_replay/odom", 100);
-	pub_gps = nh.advertise<nmea_msgs::Gpgga>("/data_replay/gps", 100);
+	pub_gps_gpgga = nh.advertise<nmea_msgs::Gpgga>("/data_replay/gps_gpgga", 100);
+	pub_gps_bestpos = nh.advertise<data_replay::Bestpos>("/data_replay/gps_bestpos", 100);
 	pub_path = nh.advertise<nav_msgs::Path>("/data_replay/path", 100);
 
 	std::shared_ptr<DataReplay> pDR(std::make_shared<DataReplay>());
 
 	ros::param::get("~rate", pDR->mnRate);
+	ros::param::get("~IsAcc", pDR->mbIsAcc);
+	ros::param::get("~Accelerate", pDR->mAccelerate);
 	ros::param::get("~log_file_path_prefix", pDR->mLogFilePathPredix);
 	ros::param::get("~imu_path", pDR->msImuPath);
 	ros::param::get("~imu2_path", pDR->msImu2Path);
@@ -33,7 +36,7 @@ int main(int argc, char **argv)
 	ros::param::get("~localization_replay", pDR->mbLocalizationReplay);
 	ros::param::get("~all_replay", pDR->mbAllReplay);
 	
-
+	
 	pDR->init();
 	pDR->MainRun();
 
